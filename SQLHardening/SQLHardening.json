@@ -1,0 +1,9 @@
+{
+    "MinVerDsiUtils"        : "1.0.5",
+    "SqlTestsFolder"        : "TestScripts",
+    "HardeningTestsFile"    : "sql_hardening_tests.sql",
+    ".SqlCmdParms"          : [
+                             "AbortOnError=True",
+                             "TrustServerCertificate=True"
+                            ]
+}
