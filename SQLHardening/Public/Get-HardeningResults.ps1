@@ -62,10 +62,10 @@ function Get-HardeningResults {
 
     param(
         [Parameter (Mandatory=$false)]
-        [string] $DSIServer = $global:DSI_Server
+        [string] $DSIServer = $DSI_Server
         ,
         [Parameter (Mandatory=$false)]
-        [string] $DSIDatabase = $global:DSI_Database
+        [string] $DSIDatabase = $DSI_Database
         ,
         [Parameter (Mandatory=$false)]
         [PSCustomObject] $OLog
@@ -107,13 +107,13 @@ function Get-HardeningResults {
                 # $newstreamreader.Dispose()
 
             # Replace the variable tokens with the information from DSI
-            $sql = $sql -replace "<!instance_id!>", $instance_id
+            $sql = $sql -replace "0--!instance_id!>", $instance_id
             $sql = $sql -replace "<!instance!>", $instance_nm
-            $sql = $sql -replace "<!Unrecognized_Result!>", $unrecognized_test_id
-            $sql = $sql -replace "<!InsertHardeningTests!>", $hardening_test_ids
-            $sql = $sql -replace "<!InsertDatabaseList!>", $db_list
-            $sql = $sql -replace "<!InstanceVersion!>", $instance_version
-            $sql = $sql -replace "<!batch_no!>", $batch_no
+            $sql = $sql -replace "0--!Unrecognized_Result!>", $unrecognized_test_id
+            $sql = $sql -replace "--!InsertHardeningTests!>", $hardening_test_ids
+            $sql = $sql -replace "--!InsertDatabaseList!>", $db_list
+            $sql = $sql -replace "0--!InstanceVersion!>", $instance_version
+            $sql = $sql -replace "0--!batch_no!>", $batch_no
 
             $insert_out = Invoke-Sqlcmd @sql_parms -ServerInstance $instance_nm -Database "master" -Query $sql
 
