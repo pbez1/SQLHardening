@@ -40,7 +40,7 @@ Install-Module SQLHardening -Repository PSRepl -Scope AllUsers -Force
 NOTE:
 This module requires the present of the "DSIUtils" module on the same computer.  DSIUtils is also available in the local DBA PowerShell repository and may be installed on the local system with the following command:
 ``` PowerShell
-Install-Module DSIUtils -Repository PSRepl -Scope AllUsers -Force</pre>
+Install-Module DSIUtils -Repository PSRepl -Scope AllUsers -Force
 ```
 ---
 
