@@ -1,7 +1,7 @@
 # SQLHardening
 
 ## Table of Contents
-[Overveiw](#overveiw)<br>
+[Overview](#overview)<br>
 [Operation](#operation)<br>
 - [Installation](#installation)<br>
 - [Configuration](#configuration)<br>
@@ -14,14 +14,14 @@
 - [Create An Exemption](#create-an-exemption)<br>
 - [Create An Implicit Exemption](#create-an-implicit-exemption)<br>
 
-[Functions](#functions)<br>
+[PowerShell Functions](#powershell-functions)<br>
 - [Get-HardeningResults](#get-hardeningresults)<br>
 
 [SQLHardening JSON File](#sqlhardening-json-file)<br>
 
 [Top](#sqlhardening)
 ___
-## Overveiw
+## Overview
 This module collects information from a list of SQL Servers and verifies whether the settings on the individual SQL Servers meet Pacificsource security requirements.  (Note: The SQLHardening module is a subsystem of the DSI inventory system and will not function as a stand-alone application.)
 
 SQL Server configuration settings include many that have implications with respect to security.  Because these settings are configurable and can change from time to time, periodic checks to assure they still comply with the published standard is a prudent thing to do.
@@ -31,7 +31,7 @@ This module provides a framework for running a selected battery of tests against
 [Top](#sqlhardening)
 ___
 ## Operation
-### Installation:
+### Installation
 The SQLHardening module is available in the local DBA PowerShell repository and must be installed on the server from which the tests will be run.  The following PowerShell script can be used to install the module onto the local computer:
 ``` PowerShell
 Install-Module SQLHardening -Repository PSRepl -Scope AllUsers -Force
@@ -40,13 +40,13 @@ Install-Module SQLHardening -Repository PSRepl -Scope AllUsers -Force
 NOTE:
 This module requires the present of the "DSIUtils" module on the same computer.  DSIUtils is also available in the local DBA PowerShell repository and may be installed on the local system with the following command:
 ``` PowerShell
-Install-Module DSIUtils -Repository PSRepl -Scope AllUsers -Force
+Install-Module DSIUtils -Repository PSRepl -Scope AllUsers -Force</pre>
 ```
 ---
 
 [Top](#sqlhardening)
 ___
-### Configuration:
+### Configuration
 The tests peformed by SQL Hardening are maintained in a T-SQL script file.  The location of that file must be defined in the "SQLHardening.json" file in the "SqlTestsPath" element.
 
 Here is an example of a typical "SQLHardening.json" file:
@@ -64,7 +64,7 @@ Here is an example of a typical "SQLHardening.json" file:
 
 [Top](#sqlhardening)
 ___
-### Entry Point:
+### Entry Point
 The entry point of the module is the function "Get-HardeningResults", and it accepts the following paramters:
 - DSIServer<br>
     This is the name of the SQL Server instance hosting the DSI database.  This parameter is optional and defaults to "spf-sv-delldb"
@@ -82,14 +82,14 @@ The entry point of the module is the function "Get-HardeningResults", and it acc
         - This is the description the batch will be referenced by.
     3) Print:
         - 1 = Print the logged output to standard out (usually the screen).
-        - 0 = Do not print the logged output.</pre>
+        - 0 = Do not print the logged output.
 
 - SQLTestScript<br>
     This is a UNC path describing the location of the T-SQL test script.  This path MUST INCLUDE THE TEST SCRIPT FILENAME.
 
 [Top](#sqlhardening)
 ___
-### Note on Execution:
+### Note on Execution
 If the SQL Hardening process is initiated from a system that does not support an integrated PowerShell interpreter such as Tidal Workload Automation, the entry point function must be called from a PowerShell executable file.  Below is an example of a very simple script/file that would accomplish that:
 ``` PowerShell
 Import-Module DSIUtils
@@ -138,7 +138,7 @@ The data written to the "sec_hardening_results" table is then available for anal
 
 [Top](#sqlhardening)
 ___
-### The T-SQL Script:
+### The T-SQL Script
 The T-SQL test script is constructed such that the code for each test is containted in its own section of the script.  That is to say, the code for each test does not rely on values that exist elsewhere in the script.  All variables and data retrievals necessary to perform the test are contained within that test's individual section.  This leads to duplication of code, to be sure, but it assures that changes made in one section of the script will not affect other sections.  Moreover, changes to security policy or SQL environments are easier to accommodate over time since adding new code and remove old code from the script can be accomplished relatively easily without introducing side effects or bugs.
 
 The script works as follows:
@@ -149,7 +149,7 @@ The script works as follows:
 
 Note that adding a new code section to the T-SQL test script requires that a new entry also be made in the "sec_hardening_test" table in the DSI database and their IDs must match.
 
-#### Create A New Test:
+#### Create A New Test
 A test can be created by executing the following stored procedure
 ``` SQL
 exec dbo.up_sec_hardening_test_add
@@ -159,21 +159,15 @@ exec dbo.up_sec_hardening_test_add
 ```
 
 Where,
-``` SQL
-@test_nm            :	varchar(50)         (Required)
-```
-The name of the test to be added.  
-``` SQL
-@accepted_values    :	varchar(max)        (Required)
-	The name of the database (if appropriate) to be exempted as specified in the
-	db_list: table.  If this parameter is left null, the exemption will be 
-	applied to the entire instance.
 
-@test_desc          :	varchar(max)        (Required)
-	The name of the test to be exempted as specified in the "sec_hardening_test"
-	table.
-```
+1) @test_nm            :	varchar(50)         (Required)
+    - The name of the test to be added.  
 
+2) @accepted_values    :	varchar(max)        (Required)
+   - Comma separated list of values that constitute test success.
+
+3) @test_desc          :	varchar(max)        (Required)
+   - A description of the test.  It may include any descriptive element that helps identify the purpose of the test.  It may also include instructions for how to mitigate a failed test.
 
 [Top](#sqlhardening)
 ___
@@ -182,7 +176,7 @@ The DSI SQL Hardening subsystem supports the notion of test exemptions.  That is
 
 In addition, there are occasionally rules that depend upon the exemption status of other related rules.  For example, if the "sa" account is allowed to exist as an exemption (SA Exists), we would not want the "SA Disabled" test to fail even though "SA Disabled" is not specifically exempted itself.  The SQL Hardening System allows for rules to be implicitly related in such a way that if one rule is exempted, its related rules are exempted also.
 
-#### Create An Exemption:
+#### Create An Exemption
 An exemption can be created by executing the following stored procedure:
 ``` SQL
 exec dbo.up_sec_hardening_exempt_add
@@ -193,24 +187,24 @@ exec dbo.up_sec_hardening_exempt_add
 	@notes = ''        -- varchar(max)</pre>
 ```
 Where,
-``` SQL
-@instance		:	sysname         (Required)
-	This is the name of the instance to be exempted as specified in the "instances"
-	table.  
-@dbname			:	sysname         (Optional)
-	The name of the database (if appropriate) to be exempted as specified in the
-	db_list: table.  If this parameter is left null, the exemption will be 
-	applied to the entire instance.
-@test_nm		:	nvarchar(max)   (Required)
-	The name of the test to be exempted as specified in the "sec_hardening_test"
-	table.
-@domain_nm		:	sysname         (Optional)
-	The password associated with the login name.
-@notes			:	varchar(max)    (Optional)
-	A convenient place to annotate the exemption.  
-```
 
-#### Create An Implicit Exemption:
+1) @instance		:	sysname         (Required)
+    - This is the name of the instance to be exempted as specified in the "instances" table.  
+2) @dbname			:	sysname         (Optional)
+    - The name of the database (if appropriate) to be exempted as specified in the db_list: table.  If this parameter is left bull, the exemption will be applied to the entire instance.
+
+3) @test_nm		:	nvarchar(max)   (Required)
+    - The name of the test to be exempted as specified in the "sec_hardening_test" table.
+
+4) @domain_nm		:	sysname         (Optional)
+    - The password associated with the login name.
+
+5) @notes			:	varchar(max)    (Optional)
+   - A convenient place to annotate the exemption.  
+
+#### Create An Implicit Exemption
+An implicit exemption is a test that is not directly exempted, but because of its dependency on another test that is exempted, it is implicitly exempted.  For example, if the "sa" account is disabled, the "Kylo Ren exists" test should not fail even if it's not directly exempted.  Since "sa" is routinely overwritten by "Kylo Ren" the two tests are related, so the "Kylo Ren exists" test will be exempted implicitly.
+
 Currently, implicit exemptions must be create by manually editing the "sec_hardening_tests_related" table in the DSI database.
 
 Two values must be supplied:
@@ -219,8 +213,8 @@ Two values must be supplied:
 
 [Top](#sqlhardening)
 ___
-## Functions:
-### *Get-HardeningResults*
+## PowerShell Functions
+### Get-HardeningResults
 #### __Description__
 This function initiates the the testing process that verifies whether or not PacificSource SQL Servers comply with the current SQL Hardening standards.
 
